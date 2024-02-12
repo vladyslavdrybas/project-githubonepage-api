@@ -6,6 +6,7 @@ namespace App\Event\Subscriber;
 
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTExpiredEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Events;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,15 +15,15 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
-use function var_dump;
 
 class ExceptionJsonSubscriber implements EventSubscriberInterface
 {
     protected string $environment;
 
-    public function __construct(string $projectEnvironment)
-    {
-        $this->environment = $projectEnvironment;
+    public function __construct(
+        protected readonly string $projectEnvironment,
+        protected readonly ParameterBagInterface $parameterBag
+    ) {
     }
 
     public static function getSubscribedEvents(): array
@@ -38,28 +39,19 @@ class ExceptionJsonSubscriber implements EventSubscriberInterface
 
     public function jwtExpired(JWTExpiredEvent $event): void
     {
-//        var_dump([
-//            'apismanager',
-//            $event->getRequest()->getPathInfo(),
-//            'jwt expired'
-//        ]);
-//        $event->setResponse(new Response('KO',Response::HTTP_BAD_REQUEST));
-//        $event->stopPropagation();
+        $data = [
+            'status' => Response::HTTP_UNAUTHORIZED,
+            'environment' => $this->projectEnvironment,
+            'service' => $this->parameterBag->get('service_name'),
+            'version' => $this->parameterBag->get('api_version'),
+            'message' => 'JWT expired.',
+        ];
+
+        $event->setResponse(new JsonResponse($data, Response::HTTP_UNAUTHORIZED));
     }
 
     public function onKernelException(ExceptionEvent $event): void
     {
-        var_dump([
-            'apismanager',
-            $event->getRequest()->getPathInfo(),
-        ]);
-
-        if ($this->environment === 'prod') {
-            $event->setResponse(new Response('KO',Response::HTTP_BAD_REQUEST));
-
-            return;
-        }
-
         $exception = $event->getThrowable();
         $code = Response::HTTP_BAD_REQUEST;
         $message = $exception->getMessage();
@@ -75,12 +67,16 @@ class ExceptionJsonSubscriber implements EventSubscriberInterface
         }
 
         $data = [
-            'message' => $message,
             'status' => $code,
-            'environment' => $this->environment,
+            'environment' => $this->projectEnvironment,
+            'service' => $this->parameterBag->get('service_name'),
+            'version' => $this->parameterBag->get('api_version'),
+            'message' => $message,
         ];
 
-        $data['trace'] = $exception->getTrace();
+        if ($this->projectEnvironment !== 'prod') {
+            $data['trace'] = $exception->getTrace();
+        }
 
         $event->setResponse(new JsonResponse($data,$code));
         // or stop propagation (prevents the next exception listeners from being called)
