@@ -22,7 +22,7 @@ class UserBuilder implements IEntityBuilder
         protected readonly UserRepository $userRepository
     ) {}
 
-    public function baseUser(
+    public function base(
         string $email,
         string $password,
         ?string $username = null

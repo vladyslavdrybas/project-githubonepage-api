@@ -22,7 +22,7 @@ class AuthController extends AbstractController
         UserRepository $repo
     ): JsonResponse {
 
-        $user = $userBuilder->baseUser($userRegisterDto->email, $userRegisterDto->password);
+        $user = $userBuilder->base($userRegisterDto->email, $userRegisterDto->password);
 
         $repo->add($user);
         $repo->save();

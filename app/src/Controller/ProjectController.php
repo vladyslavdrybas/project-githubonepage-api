@@ -21,7 +21,7 @@ class ProjectController extends AbstractController
         ApiBuilder $builder,
         ApiKeyRepository $repo
     ): Response {
-        $apiKey = $builder->baseApi($apiKeyCreateDto->owner, $apiKeyCreateDto->project);
+        $apiKey = $builder->base($apiKeyCreateDto->owner, $apiKeyCreateDto->project);
 
         $repo->add($apiKey);
         $repo->save();

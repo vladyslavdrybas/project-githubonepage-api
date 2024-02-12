@@ -12,7 +12,7 @@ use function uniqid;
 
 class ApiBuilder implements IEntityBuilder
 {
-    public function baseApi(
+    public function base(
         string $owner,
         string $project,
         ?string $title = null,
