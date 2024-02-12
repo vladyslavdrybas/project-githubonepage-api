@@ -14,11 +14,12 @@ abstract class AbstractEntityNormalizer implements NormalizerInterface
     ) {
     }
 
-    public function normalizeWithIdOnly(object $innerObject): array
+    public function shortObject(object $innerObject): array
     {
         /** @var \App\Entity\EntityInterface $innerObject */
         return [
             'id' => $innerObject->getRawId(),
+            'object' => $innerObject->getObject(),
         ];
     }
 

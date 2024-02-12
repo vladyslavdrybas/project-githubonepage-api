@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -56,6 +58,15 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
 
     #[ORM\Column(name: "is_deleted", type: Types::BOOLEAN, options: ["default" => false])]
     protected bool $isDeleted = false;
+
+    #[ORM\OneToMany(targetEntity: Project::class, mappedBy: 'owner')]
+    protected Collection $projects;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->projects = new ArrayCollection();
+    }
 
     public function isEqualTo(SecurityUserInterface $user): bool
     {
@@ -225,5 +236,35 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
     public function setLastname(?string $lastname): void
     {
         $this->lastname = $lastname;
+    }
+
+    /**
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getProjects(): Collection
+    {
+        return $this->projects;
+    }
+
+    public function addProject(Project $project): void
+    {
+        if (!$this->projects->contains($project)) {
+            $this->projects->add($project);
+            $project->setOwner($this);
+        }
+    }
+
+    /**
+     * @param \Doctrine\Common\Collections\Collection $projects
+     */
+    public function setProjects(Collection $projects): void
+    {
+        foreach ($projects as $project) {
+            if (!$project instanceof Project) {
+                throw new \Exception('Should be instance of ' . Project::class);
+            }
+
+            $this->addProject($project);
+        }
     }
 }

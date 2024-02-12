@@ -7,13 +7,10 @@ namespace App\Builder;
 use App\Entity\User;
 use App\Exceptions\AlreadyExists;
 use App\Repository\UserRepository;
+use App\Utility\RandomGenerator;
 use InvalidArgumentException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use function bin2hex;
-use function random_bytes;
-use function sprintf;
 use function strlen;
-use function uniqid;
 
 class UserBuilder implements IEntityBuilder
 {
@@ -42,11 +39,8 @@ class UserBuilder implements IEntityBuilder
         $user->setPassword($password);
 
         if (null === $username) {
-            $user->setUsername(sprintf(
-                '%s.%s'
-                , uniqid('u', false)
-                , bin2hex(random_bytes(3))
-            ));
+            $rndGen = new RandomGenerator();
+            $user->setUsername($rndGen->uniqueId('u'));
         }
 
         $hashedPassword = $this->passwordHasher->hashPassword(
