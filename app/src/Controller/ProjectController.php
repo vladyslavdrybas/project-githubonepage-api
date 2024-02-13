@@ -7,28 +7,29 @@ namespace App\Controller;
 use App\Builder\ApiBuilder;
 use App\Builder\ProjectBuilder;
 use App\DataTransferObject\ApiKeyCreateDto;
-use App\DataTransferObject\ProjectCreateDto;
+use App\DataTransferObject\ProjectDto;
 use App\Entity\Project;
 use App\Repository\ApiKeyRepository;
 use App\Repository\ProjectRepository;
 use App\Security\Permissions;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use function var_dump;
 
 #[Route('/project', name: "api_project")]
 class ProjectController extends AbstractController
 {
     #[Route('', name: '_create', methods: ["POST"])]
     public function create(
-        #[MapRequestPayload] ProjectCreateDto $projectCreateDto,
-        ProjectBuilder $builder,
-        ProjectRepository $repo
+        #[MapRequestPayload] ProjectDto $projectDto,
+        ProjectBuilder                  $builder,
+        ProjectRepository               $repo
     ): Response {
-        $project = $builder->base($projectCreateDto);
+        $user = $this->getUser();
+        $projectDto->owner = $user;
+
+        $project = $builder->base($projectDto);
 
         $repo->add($project);
         $repo->save();
@@ -45,7 +46,7 @@ class ProjectController extends AbstractController
     }
 
     #[Route('/apikey', name: '_apikey', methods: ["POST"])]
-    public function index(
+    public function apiKeyCreate(
         #[MapRequestPayload] ApiKeyCreateDto $apiKeyCreateDto,
         ApiBuilder $builder,
         ApiKeyRepository $repo

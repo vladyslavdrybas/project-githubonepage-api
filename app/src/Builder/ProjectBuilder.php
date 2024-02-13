@@ -4,35 +4,21 @@ declare(strict_types=1);
 
 namespace App\Builder;
 
-use App\DataTransferObject\ProjectCreateDto;
+use App\DataTransferObject\ProjectDto;
 use App\Entity\Project;
-use App\Entity\User;
-use App\Exceptions\AccessDenied;
 use App\Utility\RandomGenerator;
-use Symfony\Bundle\SecurityBundle\Security;
 
 class ProjectBuilder implements IEntityBuilder
 {
-    public function __construct(
-        protected readonly Security $security,
-    ) {
-    }
-
-    public function base(ProjectCreateDto $projectCreateDto): Project
+    public function base(ProjectDto $projectDto): Project
     {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
-            throw new AccessDenied();
-        }
         $rndGen = new RandomGenerator();
-
-        $title = null === $projectCreateDto->title ? $rndGen->uniqueId('p') : $projectCreateDto->title;
-
+        $title = null === $projectDto->title ? $rndGen->uniqueId('p') : $projectDto->title;
 
         $project = new Project();
-        $project->setOwner($user);
+        $project->setOwner($projectDto->owner);
         $project->setTitle($title);
-        $project->setDescription($projectCreateDto->description);
+        $project->setDescription($projectDto->description);
 
         return $project;
     }

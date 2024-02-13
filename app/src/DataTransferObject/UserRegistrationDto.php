@@ -6,7 +6,7 @@ namespace App\DataTransferObject;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-readonly class UserRegistrationDto implements IDataTransferObject
+class UserRegistrationDto implements IDataTransferObject
 {
     public function __construct(
         #[Assert\Email]
