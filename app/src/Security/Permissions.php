@@ -6,10 +6,8 @@ namespace App\Security;
 
 interface Permissions
 {
+    const CREATE = 'create';
     const READ = 'read';
     const UPDATE = 'update';
-    const VIEW = 'view';
-    const EDIT = 'edit';
     const DELETE = 'delete';
-    const MANAGE = 'manage';
 }
