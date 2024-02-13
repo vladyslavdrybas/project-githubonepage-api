@@ -13,6 +13,7 @@ services:
       - .env
     networks:
       - default
+      - database_network
     depends_on:
       - database
     labels:
@@ -91,7 +92,7 @@ networks:
     name: ${PROXY_NETWORK}
     external: true
   database_network:
-    name: ${PROXY_NETWORK}
+    name: ${DATABASE_NETWORK}
     external: true
   default:
     name: ${APP_NETWORK}
