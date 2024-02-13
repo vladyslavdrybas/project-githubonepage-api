@@ -45,6 +45,33 @@ class ProjectController extends AbstractController
         return $this->json($project);
     }
 
+    #[Route('/{project}', name: '_update', methods: ["PUT"])]
+    #[IsGranted(Permissions::UPDATE, 'project', 'Access denied', Response::HTTP_UNAUTHORIZED)]
+    public function update(
+        #[MapRequestPayload] ProjectDto $projectDto,
+        ProjectRepository $repo,
+        Project $project
+    ): Response {
+        $isChanged = false;
+
+        if (null !== $projectDto->title) {
+            $project->setTitle($projectDto->title);
+            $isChanged = true;
+        }
+
+        if (null !== $projectDto->description) {
+            $project->setDescription($projectDto->description);
+            $isChanged = true;
+        }
+
+        if ($isChanged) {
+            $repo->add($project);
+            $repo->save();
+        }
+
+        return $this->json($project);
+    }
+
     #[Route('/apikey', name: '_apikey', methods: ["POST"])]
     public function apiKeyCreate(
         #[MapRequestPayload] ApiKeyCreateDto $apiKeyCreateDto,
