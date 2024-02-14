@@ -59,8 +59,12 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
     #[ORM\Column(name: "is_deleted", type: Types::BOOLEAN, options: ["default" => false])]
     protected bool $isDeleted = false;
 
-    #[ORM\OneToMany(targetEntity: Project::class, mappedBy: 'owner')]
+    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Project::class)]
     protected Collection $projects;
+
+    #[ORM\ManyToOne(targetEntity: Subscription::class)]
+    #[ORM\JoinColumn(name:'subscription_id', referencedColumnName: 'id', nullable: true)]
+    protected ?Subscription $subscription = null;
 
     public function __construct()
     {
@@ -266,5 +270,21 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
 
             $this->addProject($project);
         }
+    }
+
+    /**
+     * @return \App\Entity\Subscription|null
+     */
+    public function getSubscription(): ?Subscription
+    {
+        return $this->subscription;
+    }
+
+    /**
+     * @param \App\Entity\Subscription|null $subscription
+     */
+    public function setSubscription(?Subscription $subscription): void
+    {
+        $this->subscription = $subscription;
     }
 }

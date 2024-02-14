@@ -33,6 +33,9 @@ class ApiKey implements EntityInterface
     #[ORM\Column(name: "endDate", type: Types::DATETIME_MUTABLE, nullable: true)]
     protected ?DateTimeInterface $endDate = null;
 
+    #[ORM\Column(name: "is_subscription_active", type: Types::BOOLEAN, options: ['default' => true])]
+    protected bool $isSubscriptionActive = true;
+
     public function __construct()
     {
         $this->setCreatedAt(new DateTime());
@@ -148,5 +151,21 @@ class ApiKey implements EntityInterface
     public function setTitle(string $title): void
     {
         $this->title = $title;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSubscriptionActive(): bool
+    {
+        return $this->isSubscriptionActive;
+    }
+
+    /**
+     * @param bool $isSubscriptionActive
+     */
+    public function setIsSubscriptionActive(bool $isSubscriptionActive): void
+    {
+        $this->isSubscriptionActive = $isSubscriptionActive;
     }
 }
