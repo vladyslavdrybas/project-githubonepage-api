@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Serializer;
 
-use App\Entity\Subscription;
+use App\Entity\SubscriptionPlan;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class SubscriptionNormalizer extends AbstractEntityNormalizer
@@ -33,7 +33,7 @@ class SubscriptionNormalizer extends AbstractEntityNormalizer
      */
     public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
-        return $data instanceof Subscription;
+        return $data instanceof SubscriptionPlan;
     }
 
     /**
@@ -42,7 +42,7 @@ class SubscriptionNormalizer extends AbstractEntityNormalizer
     public function getSupportedTypes(?string $format): array
     {
         return [
-            Subscription::class => true,
+            SubscriptionPlan::class => true,
         ];
     }
 }

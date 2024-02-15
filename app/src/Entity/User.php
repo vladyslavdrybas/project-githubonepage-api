@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\UserRepository;
@@ -14,14 +16,14 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 use function array_unique;
 
-// TODO add user password reset
-// TODO add user email confirmation
-// TODO add user email (unique identifier) change/update
-// TODO add user subscriptions
-// TODO add payments
-// TODO add mail promotions for user
-// TODO add web push notification promotions for user
-// TODO add web/email reminders for user to do some action
+# TODO add user password reset
+# TODO add user email confirmation
+# TODO add user email (unique identifier) change/update
+# TODO add user subscriptions
+# TODO add payments
+# TODO add mail promotions for user
+# TODO add web push notification promotions for user
+# TODO add web/email reminders for user to do some action
 #[ORM\Entity(repositoryClass: UserRepository::class, readOnly: false)]
 #[ORM\Table(name: "user")]
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email.')]
@@ -62,9 +64,9 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Project::class)]
     protected Collection $projects;
 
-    #[ORM\ManyToOne(targetEntity: Subscription::class)]
+    #[ORM\ManyToOne(targetEntity: SubscriptionPlan::class)]
     #[ORM\JoinColumn(name:'subscription_id', referencedColumnName: 'id', nullable: true)]
-    protected ?Subscription $subscription = null;
+    protected ?SubscriptionPlan $subscription = null;
 
     public function __construct()
     {
@@ -273,17 +275,17 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
     }
 
     /**
-     * @return \App\Entity\Subscription|null
+     * @return \App\Entity\SubscriptionPlan|null
      */
-    public function getSubscription(): ?Subscription
+    public function getSubscription(): ?SubscriptionPlan
     {
         return $this->subscription;
     }
 
     /**
-     * @param \App\Entity\Subscription|null $subscription
+     * @param \App\Entity\SubscriptionPlan|null $subscription
      */
-    public function setSubscription(?Subscription $subscription): void
+    public function setSubscription(?SubscriptionPlan $subscription): void
     {
         $this->subscription = $subscription;
     }

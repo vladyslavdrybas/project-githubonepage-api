@@ -4,192 +4,117 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Entity\Types\PeriodType;
 use App\Repository\SubscriptionRepository;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: SubscriptionRepository::class, readOnly: false)]
 #[ORM\Table(name: "subscription")]
+#[ORM\UniqueConstraint(
+    name: 'subscriber_subscription_plan',
+    columns: ['subscriber_id', 'subscription_plan_id']
+)]
+#[UniqueEntity(fields: ['subscriber', 'subscriptionPlan'])]
 class Subscription extends AbstractEntity
 {
-    #[ORM\Column(name: "title", type: Types::STRING, length: 36)]
-    protected string $title;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name:'subscriber_id', referencedColumnName: 'id', nullable: true)]
+    protected User $subscriber;
 
-    #[ORM\Column(name: "description", type: Types::STRING, length: 256, unique: false, nullable: true)]
-    protected string $description;
+    #[ORM\ManyToOne(targetEntity: SubscriptionPlan::class)]
+    #[ORM\JoinColumn(name:'subscription_plan_id', referencedColumnName: 'id', nullable: true)]
+    protected SubscriptionPlan $subscriptionPlan;
 
-    #[ORM\Column(name: "region", type: Types::STRING, length: 3, options: ['default' => 'ALL'])]
-    protected string $region = 'ALL';
+    #[ORM\Column(name: "endDate", type: Types::DATETIME_MUTABLE, nullable: true)]
+    protected ?DateTimeInterface $endDate = null;
 
-    # ISO 3166-1 alpha-3
-    #[ORM\Column(name: "country", type: Types::STRING, length: 3, options: ['default' => 'ALL'])]
-    protected string $country = 'ALL';
-
-    # ISO 4217
-    #[ORM\Column(name: "currency", type: Types::STRING, length: 3, options: ['default' => 'USD'])]
-    protected string $currency = 'USD';
-
-    # cents
-    #[ORM\Column(name: "price", type: Types::INTEGER, length: 20)]
-    protected string $price;
-
-    # month, year
-    #[ORM\Column(name: "period", type: Types::STRING, length: 7, enumType: PeriodType::class)]
-    protected PeriodType $period = PeriodType::MONTH;
-
-    #[ORM\JoinTable(name: 'subscription_offer')]
-    #[ORM\JoinColumn(name: 'subscription_id', referencedColumnName: 'id')]
-    #[ORM\InverseJoinColumn(name: 'offer_id', referencedColumnName: 'id')]
-    #[ORM\ManyToMany(targetEntity: Offer::class)]
-    protected Collection $offers;
+    #[ORM\OneToMany(mappedBy: 'subscription', targetEntity: Project::class)]
+    protected Collection $projects;
 
     public function __construct()
     {
         parent::__construct();
-        $this->offers = new ArrayCollection();
+        $this->projects = new ArrayCollection();
     }
 
     /**
-     * @return string
+     * @return \App\Entity\User
      */
-    public function getTitle(): string
+    public function getSubscriber(): User
     {
-        return $this->title;
+        return $this->subscriber;
     }
 
     /**
-     * @param string $title
+     * @param \App\Entity\User $subscriber
      */
-    public function setTitle(string $title): void
+    public function setSubscriber(User $subscriber): void
     {
-        $this->title = $title;
+        $this->subscriber = $subscriber;
     }
 
     /**
-     * @return string
+     * @return \App\Entity\SubscriptionPlan
      */
-    public function getDescription(): string
+    public function getSubscriptionPlan(): SubscriptionPlan
     {
-        return $this->description;
+        return $this->subscriptionPlan;
     }
 
     /**
-     * @param string $description
+     * @param \App\Entity\SubscriptionPlan $subscriptionPlan
      */
-    public function setDescription(string $description): void
+    public function setSubscriptionPlan(SubscriptionPlan $subscriptionPlan): void
     {
-        $this->description = $description;
+        $this->subscriptionPlan = $subscriptionPlan;
     }
 
     /**
-     * @return string
+     * @return \DateTimeInterface|null
      */
-    public function getRegion(): string
+    public function getEndDate(): ?DateTimeInterface
     {
-        return $this->region;
+        return $this->endDate;
     }
 
     /**
-     * @param string $region
+     * @param \DateTimeInterface|null $endDate
      */
-    public function setRegion(string $region): void
+    public function setEndDate(?DateTimeInterface $endDate): void
     {
-        $this->region = $region;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCountry(): string
-    {
-        return $this->country;
-    }
-
-    /**
-     * @param string $country
-     */
-    public function setCountry(string $country): void
-    {
-        $this->country = $country;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCurrency(): string
-    {
-        return $this->currency;
-    }
-
-    /**
-     * @param string $currency
-     */
-    public function setCurrency(string $currency): void
-    {
-        $this->currency = $currency;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPrice(): string
-    {
-        return $this->price;
-    }
-
-    /**
-     * @param string $price
-     */
-    public function setPrice(string $price): void
-    {
-        $this->price = $price;
-    }
-
-    /**
-     * @return \App\Entity\Types\PeriodType
-     */
-    public function getPeriod(): PeriodType
-    {
-        return $this->period;
-    }
-
-    /**
-     * @param \App\Entity\Types\PeriodType $period
-     */
-    public function setPeriod(PeriodType $period): void
-    {
-        $this->period = $period;
+        $this->endDate = $endDate;
     }
 
     /**
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getOffers(): Collection
+    public function getProjects(): Collection
     {
-        return $this->offers;
+        return $this->projects;
     }
 
-    public function addOffer(Offer $offer): void
+    public function addProject(Project $project): void
     {
-        if (!$this->offers->contains($offer)) {
-            $this->offers->add($offer);
+        if (!$this->projects->contains($project)) {
+            $this->projects->add($project);
         }
     }
 
     /**
-     * @param \Doctrine\Common\Collections\Collection $offers
+     * @param \Doctrine\Common\Collections\Collection $projects
      */
-    public function setOffers(Collection $offers): void
+    public function setProjects(Collection $projects): void
     {
-        foreach ($offers as $offer) {
-            if (!$offer instanceof Offer) {
-                throw new \Exception('Should be instance of ' . Offer::class);
+        foreach ($projects as $project) {
+            if (!$project instanceof Project) {
+                throw new \Exception('Should be instance of ' . Project::class);
             }
 
-            $this->addOffer($offer);
+            $this->addProject($project);
         }
     }
 }

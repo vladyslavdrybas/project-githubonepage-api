@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Security\Voter;
 
-use App\Entity\Subscription;
+use App\Entity\SubscriptionPlan;
 use App\Entity\User;
 use App\Security\Permissions;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -14,7 +14,7 @@ class SubscriptionVoter extends AbstractVoter
 {
     protected function supports(string $attribute, mixed $subject): bool
     {
-        if (!$subject instanceof Subscription) {
+        if (!$subject instanceof SubscriptionPlan) {
             return false;
         }
 
