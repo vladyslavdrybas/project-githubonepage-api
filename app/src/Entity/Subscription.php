@@ -32,6 +32,9 @@ class Subscription extends AbstractEntity
     #[ORM\Column(name: "endDate", type: Types::DATETIME_MUTABLE, nullable: true)]
     protected ?DateTimeInterface $endDate = null;
 
+    #[ORM\Column(name: "is_payed", type: Types::BOOLEAN, nullable: false, options: ['default' => false])]
+    protected bool $isPayed = false;
+
     #[ORM\OneToMany(mappedBy: 'subscription', targetEntity: Project::class)]
     protected Collection $projects;
 
@@ -116,5 +119,21 @@ class Subscription extends AbstractEntity
 
             $this->addProject($project);
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPayed(): bool
+    {
+        return $this->isPayed;
+    }
+
+    /**
+     * @param bool $isPayed
+     */
+    public function setIsPayed(bool $isPayed): void
+    {
+        $this->isPayed = $isPayed;
     }
 }

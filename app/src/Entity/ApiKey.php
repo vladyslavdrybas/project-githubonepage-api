@@ -26,11 +26,13 @@ class ApiKey implements EntityInterface
     #[ORM\Column(name: "title", type: Types::STRING, length: 36, unique: false, nullable: false)]
     protected string $title;
 
-    #[ORM\Column(name: "owner", type: Types::STRING, length: 36, unique: false, nullable: false)]
-    protected string $owner;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name:'owner_id', referencedColumnName: 'id', nullable: false)]
+    protected User $owner;
 
-    #[ORM\Column(name: "project", type: Types::STRING, length: 36, unique: false, nullable: false)]
-    protected string $project;
+    #[ORM\ManyToOne(targetEntity: Project::class)]
+    #[ORM\JoinColumn(name:'project_id', referencedColumnName: 'id', nullable: false)]
+    protected Project $project;
 
     #[ORM\Column(name: "endDate", type: Types::DATETIME_MUTABLE, nullable: true)]
     protected ?DateTimeInterface $endDate = null;
@@ -108,33 +110,33 @@ class ApiKey implements EntityInterface
     }
 
     /**
-     * @return string
+     * @return \App\Entity\User
      */
-    public function getOwner(): string
+    public function getOwner(): User
     {
         return $this->owner;
     }
 
     /**
-     * @param string $owner
+     * @param \App\Entity\User $owner
      */
-    public function setOwner(string $owner): void
+    public function setOwner(User $owner): void
     {
         $this->owner = $owner;
     }
 
     /**
-     * @return string
+     * @return \App\Entity\Project
      */
-    public function getProject(): string
+    public function getProject(): Project
     {
         return $this->project;
     }
 
     /**
-     * @param string $project
+     * @param \App\Entity\Project $project
      */
-    public function setProject(string $project): void
+    public function setProject(Project $project): void
     {
         $this->project = $project;
     }

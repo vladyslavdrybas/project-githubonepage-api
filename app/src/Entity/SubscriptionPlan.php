@@ -15,10 +15,10 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\Entity(repositoryClass: SubscriptionPlanRepository::class, readOnly: false)]
 #[ORM\Table(name: "subscription_plan")]
 #[ORM\UniqueConstraint(
-    name: 'title_region_country',
-    columns: ['title', 'region', 'country']
+    name: 'title_region_country_period',
+    columns: ['title', 'region', 'country', 'period']
 )]
-#[UniqueEntity(fields: ['title', 'region', 'country'])]
+#[UniqueEntity(fields: ['title', 'region', 'country', 'period'])]
 class SubscriptionPlan extends AbstractEntity
 {
     #[ORM\Column(name: "title", type: Types::STRING, length: 36)]

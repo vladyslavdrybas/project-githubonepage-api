@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Serializer;
 
-use App\Entity\Subscription;
+use App\Entity\SubscriptionPlan;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
-class SubscriptionNormalizer extends AbstractEntityNormalizer
+class SubscriptionPlanNormalizer extends AbstractEntityNormalizer
 {
 
     /**
-     * @param Subscription $object
+     * @param SubscriptionPlan $object
      * @inheritDoc
      */
     public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
@@ -20,19 +20,11 @@ class SubscriptionNormalizer extends AbstractEntityNormalizer
             $object,
             $format,
             [
-                AbstractNormalizer::CALLBACKS => [
-                    'subscriber' => [$this, 'shortObject'],
-                    'subscriptionPlan' => [$this, 'shortObject'],
-                ],
                 AbstractNormalizer::IGNORED_ATTRIBUTES => [
                     'rawId',
-                    'projects',
-                    'payed',
                 ],
             ]
         );
-
-        $data['isPayed'] = $object->isPayed();
 
         return $data;
     }
@@ -42,7 +34,7 @@ class SubscriptionNormalizer extends AbstractEntityNormalizer
      */
     public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
-        return $data instanceof Subscription;
+        return $data instanceof SubscriptionPlan;
     }
 
     /**
@@ -51,7 +43,7 @@ class SubscriptionNormalizer extends AbstractEntityNormalizer
     public function getSupportedTypes(?string $format): array
     {
         return [
-            Subscription::class => true,
+            SubscriptionPlan::class => true,
         ];
     }
 }

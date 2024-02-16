@@ -11,6 +11,7 @@ class ProjectNormalizer extends AbstractEntityNormalizer
 {
 
     /**
+     * @param Project $object
      * @inheritDoc
      */
     public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null

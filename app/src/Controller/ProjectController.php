@@ -6,7 +6,7 @@ namespace App\Controller;
 
 use App\Builder\ApiBuilder;
 use App\Builder\ProjectBuilder;
-use App\DataTransferObject\ApiKeyCreateDto;
+use App\DataTransferObject\ApiKeyDto;
 use App\DataTransferObject\ProjectDto;
 use App\Entity\Project;
 use App\Repository\ApiKeyRepository;
@@ -74,11 +74,11 @@ class ProjectController extends AbstractController
 
     #[Route('/apikey', name: '_apikey', methods: ["POST"])]
     public function apiKeyCreate(
-        #[MapRequestPayload] ApiKeyCreateDto $apiKeyCreateDto,
-        ApiBuilder $builder,
-        ApiKeyRepository $repo
+        #[MapRequestPayload] ApiKeyDto $apiKeyCreateDto,
+        ApiBuilder                     $builder,
+        ApiKeyRepository               $repo
     ): Response {
-        $apiKey = $builder->base($apiKeyCreateDto->owner, $apiKeyCreateDto->project);
+        $apiKey = $builder->base($apiKeyCreateDto);
 
         $repo->add($apiKey);
         $repo->save();
