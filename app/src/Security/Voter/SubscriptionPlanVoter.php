@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Security\Voter;
 
-use App\Entity\Subscription;
+use App\Entity\SubscriptionPlan;
 use App\Entity\User;
 use App\Security\Permissions;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use function in_array;
 
-class SubscriptionVoter extends AbstractVoter
+class SubscriptionPlanVoter extends AbstractVoter
 {
     protected function supports(string $attribute, mixed $subject): bool
     {
-        if (!$subject instanceof Subscription) {
+        if (!$subject instanceof SubscriptionPlan) {
             return false;
         }
 
@@ -30,12 +30,6 @@ class SubscriptionVoter extends AbstractVoter
         return true;
     }
 
-    /**
-     * @param string $attribute
-     * @param Subscription $subject
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @return bool
-     */
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
         $user = $token->getUser();
@@ -45,9 +39,7 @@ class SubscriptionVoter extends AbstractVoter
         }
 
         return match($attribute) {
-            Permissions::READ => $this->isOwner($subject, $user),
-            Permissions::UPDATE => $this->isOwner($subject, $user),
-            Permissions::DELETE => $this->isOwner($subject, $user),
+            Permissions::READ => true,
             default => throw new \LogicException('This code should not be reached!')
         };
     }

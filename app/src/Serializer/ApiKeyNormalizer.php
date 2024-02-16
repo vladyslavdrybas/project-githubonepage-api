@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Serializer;
 
-use App\Entity\Project;
+use App\Entity\ApiKey;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
-class ProjectNormalizer extends AbstractEntityNormalizer
+class ApiKeyNormalizer extends AbstractEntityNormalizer
 {
 
     /**
-     * @param Project $object
+     * @param ApiKey $object
      * @inheritDoc
      */
     public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
@@ -22,13 +22,17 @@ class ProjectNormalizer extends AbstractEntityNormalizer
             [
                 AbstractNormalizer::CALLBACKS => [
                     'owner' => [$this, 'shortObject'],
-                    'subscription' => [$this, 'shortObject'],
+                    'project' => [$this, 'shortObject'],
                 ],
                 AbstractNormalizer::IGNORED_ATTRIBUTES => [
                     'rawId',
+                    'valid',
+                    'subscriptionActive',
                 ],
             ]
         );
+
+        $data['isValid'] = $object->isValid();
 
         return $data;
     }
@@ -38,7 +42,7 @@ class ProjectNormalizer extends AbstractEntityNormalizer
      */
     public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
-        return $data instanceof Project;
+        return $data instanceof ApiKey;
     }
 
     /**
@@ -47,7 +51,7 @@ class ProjectNormalizer extends AbstractEntityNormalizer
     public function getSupportedTypes(?string $format): array
     {
         return [
-            Project::class => true,
+            ApiKey::class => true,
         ];
     }
 }

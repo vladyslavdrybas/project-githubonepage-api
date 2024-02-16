@@ -74,15 +74,16 @@ class ProjectController extends AbstractController
 
     #[Route('/apikey', name: '_apikey', methods: ["POST"])]
     public function apiKeyCreate(
-        #[MapRequestPayload] ApiKeyDto $apiKeyCreateDto,
+        #[MapRequestPayload] ApiKeyDto $apiKeyDto,
         ApiBuilder                     $builder,
         ApiKeyRepository               $repo
     ): Response {
-        $apiKey = $builder->base($apiKeyCreateDto);
+        $apiKeyDto->owner = $this->getUser();
+        $apiKey = $builder->base($apiKeyDto);
 
         $repo->add($apiKey);
         $repo->save();
 
-        return new Response('OK', Response::HTTP_OK);
+        return $this->json($apiKey);
     }
 }

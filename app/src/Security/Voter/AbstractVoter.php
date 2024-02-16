@@ -19,6 +19,10 @@ abstract class AbstractVoter extends Voter
     ): bool {
         if (method_exists($subject, 'getOwner')) {
             return $subject->getOwner() === $user;
+        } elseif (method_exists($subject, 'getSubscriber')) {
+            return $subject->getSubscriber() === $user;
+        } elseif (method_exists($subject, 'getCreator')) {
+            return $subject->getCreator() === $user;
         }
 
         return false;

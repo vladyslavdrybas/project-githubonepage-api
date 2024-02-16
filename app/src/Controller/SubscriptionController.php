@@ -15,9 +15,17 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/subscription', name: "api_subscription")]
 class SubscriptionController extends AbstractController
 {
-    #[Route('/plan/{subscriptionPlan}', name: '_plan_read', methods: ["GET"])]
-    #[IsGranted(Permissions::READ, 'subscriptionPlan', 'Access denied', Response::HTTP_UNAUTHORIZED)]
+    #[Route('/{subscription}', name: '_read', methods: ["GET"])]
+    #[IsGranted(Permissions::READ, 'subscription', 'Access denied', Response::HTTP_UNAUTHORIZED)]
     public function read(
+        Subscription $subscription
+    ): Response {
+        return $this->json($subscription);
+    }
+
+    #[Route('/plan/{subscriptionPlan}', name: '_plan', methods: ["GET"])]
+    #[IsGranted(Permissions::READ, 'subscriptionPlan', 'Access denied', Response::HTTP_UNAUTHORIZED)]
+    public function plan(
         SubscriptionPlan $subscriptionPlan
     ): Response {
         return $this->json($subscriptionPlan);

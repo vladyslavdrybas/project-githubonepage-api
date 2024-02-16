@@ -18,6 +18,7 @@ class ProjectBuilder implements IEntityBuilder
         $project = new Project();
         $project->setOwner($projectDto->owner);
         $project->setTitle($title);
+        $project->setSubscription($projectDto->subscription);
         $project->setDescription($projectDto->description);
 
         return $project;
