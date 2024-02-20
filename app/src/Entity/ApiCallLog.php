@@ -27,9 +27,6 @@ class ApiCallLog  implements EntityInterface
     #[ORM\Column(name: "cost_per_call", type: Types::INTEGER)]
     protected int $costPerCall;
 
-    #[ORM\Column(name: "tax", type: Types::INTEGER)]
-    protected int $tax;
-
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name:'sender_id', referencedColumnName: 'id')]
     protected User $sender;
@@ -37,10 +34,6 @@ class ApiCallLog  implements EntityInterface
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name:'recipient_id', referencedColumnName: 'id')]
     protected User $recipient;
-
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name:'taxer_id', referencedColumnName: 'id')]
-    protected User $taxer;
 
     #[ORM\Column(name: "created_at", type: Types::DATETIME_MUTABLE)]
     protected DateTimeInterface $createdAt;

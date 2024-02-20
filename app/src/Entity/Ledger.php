@@ -19,8 +19,8 @@ class Ledger implements EntityInterface
     #[ORM\JoinColumn(name:'owner_id', referencedColumnName: 'id')]
     protected User $owner;
 
-    #[ORM\Column(name: "balance", type: Types::INTEGER, nullable: false, options: ['default' => 0])]
-    protected int $balance = 0;
+    #[ORM\Column(name: "balance", type: Types::FLOAT, nullable: false, options: ['default' => 0.0])]
+    protected float $balance = 0.0;
 
     /**
      * @return string
@@ -65,17 +65,17 @@ class Ledger implements EntityInterface
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getBalance(): int
+    public function getBalance(): float
     {
         return $this->balance;
     }
 
     /**
-     * @param int $balance
+     * @param float $balance
      */
-    public function setBalance(int $balance): void
+    public function setBalance(float $balance): void
     {
         $this->balance = $balance;
     }

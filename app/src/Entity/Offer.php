@@ -15,11 +15,8 @@ class Offer extends AbstractEntity
     #[ORM\Column(name: "title", type: Types::STRING, length: 36)]
     protected string $title;
 
-    #[ORM\Column(name: "description", type: Types::STRING, length: 256, unique: false, nullable: true)]
+    #[ORM\Column(name: "description", type: Types::STRING, length: 256, unique: false)]
     protected string $description;
-
-    #[ORM\Column(name: "formula", type: Types::STRING, length: 256, unique: false, nullable: true)]
-    protected string $formula;
 
     /**
      * @return string
@@ -51,21 +48,5 @@ class Offer extends AbstractEntity
     public function setDescription(string $description): void
     {
         $this->description = $description;
-    }
-
-    /**
-     * @return string
-     */
-    public function getFormula(): string
-    {
-        return $this->formula;
-    }
-
-    /**
-     * @param string $formula
-     */
-    public function setFormula(string $formula): void
-    {
-        $this->formula = $formula;
     }
 }
