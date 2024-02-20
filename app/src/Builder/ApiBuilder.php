@@ -26,6 +26,7 @@ class ApiBuilder implements IEntityBuilder
         $apiKey->setProject($apiKeyCreateDto->project);
         $apiKey->setApiKey($hex);
         $apiKey->setTitle($title);
+        $apiKey->setCostPerCall($apiKeyCreateDto->costPerCall);
 
         if ($apiKeyCreateDto->ttl > 0) {
             $endDate = new \DateTime();

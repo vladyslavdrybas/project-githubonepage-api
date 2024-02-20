@@ -156,4 +156,20 @@ class ApiKey implements EntityInterface
     {
         $this->endDate = $endDate;
     }
+
+    /**
+     * @return int
+     */
+    public function getCostPerCall(): int
+    {
+        return $this->costPerCall;
+    }
+
+    /**
+     * @param int $costPerCall
+     */
+    public function setCostPerCall(int $costPerCall): void
+    {
+        $this->costPerCall = $costPerCall;
+    }
 }

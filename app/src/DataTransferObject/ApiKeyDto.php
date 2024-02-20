@@ -13,6 +13,7 @@ class ApiKeyDto implements IDataTransferObject
         public Project $project,
         public ?User $owner = null,
         public ?string $title = null,
-        public int $ttl = 0
+        public int $ttl = 0,
+        public int $costPerCall = 0
     ) {}
 }
