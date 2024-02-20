@@ -34,7 +34,7 @@ class ApiKey implements EntityInterface
     #[ORM\JoinColumn(name:'project_id', referencedColumnName: 'id', nullable: false)]
     protected Project $project;
 
-    #[ORM\Column(name: "endDate", type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[ORM\Column(name: "end_date", type: Types::DATETIME_MUTABLE, nullable: true)]
     protected ?DateTimeInterface $endDate = null;
 
     #[ORM\Column(name: "cost_per_call", type: Types::INTEGER, nullable: false, options: ['default' => 0])]
