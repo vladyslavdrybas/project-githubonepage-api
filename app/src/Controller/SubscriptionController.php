@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Builder\SubscriptionBuilder;
+use App\DataTransferObject\SubscriptionDto;
 use App\Entity\Subscription;
 use App\Entity\SubscriptionPlan;
 use App\Repository\SubscriptionRepository;
@@ -34,12 +36,11 @@ class SubscriptionController extends AbstractController
     #[Route('/subscribe/{subscriptionPlan}', name: '_subscribe', methods: ["GET"])]
     public function subscribe(
         SubscriptionPlan $subscriptionPlan,
-        SubscriptionRepository $repo
+        SubscriptionRepository $repo,
+        SubscriptionBuilder $builder
     ): Response {
-        $subscription = new Subscription();
-
-        $subscription->setSubscriber($this->getUser());
-        $subscription->setSubscriptionPlan($subscriptionPlan);
+        $dto = new SubscriptionDto($this->getUser(), $subscriptionPlan);
+        $subscription = $builder->base($dto);
 
 //        $period = $subscriptionPlan->getPeriod();
 //        $subscriptionEndDate = match($period) {
