@@ -64,6 +64,9 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Project::class)]
     protected Collection $projects;
 
+    #[ORM\OneToOne(mappedBy: 'owner', targetEntity: Ledger::class, cascade: ['persist'])]
+    protected Ledger $ledger;
+
     #[ORM\ManyToOne(targetEntity: SubscriptionPlan::class)]
     #[ORM\JoinColumn(name:'subscription_id', referencedColumnName: 'id', nullable: true)]
     protected ?SubscriptionPlan $subscription = null;
@@ -288,5 +291,21 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
     public function setSubscription(?SubscriptionPlan $subscription): void
     {
         $this->subscription = $subscription;
+    }
+
+    /**
+     * @return \App\Entity\Ledger
+     */
+    public function getLedger(): Ledger
+    {
+        return $this->ledger;
+    }
+
+    /**
+     * @param \App\Entity\Ledger $ledger
+     */
+    public function setLedger(Ledger $ledger): void
+    {
+        $this->ledger = $ledger;
     }
 }
