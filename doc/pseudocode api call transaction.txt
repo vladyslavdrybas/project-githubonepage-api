@@ -1,0 +1,8 @@
+1. api auth system received api call for endpoint
+2. api key valid (check coins values) - create ApiCallTransaction
+3. job took last api call transactions and update ledger
+3.1 check if coins locked: wait or continue
+3.2 lock coins
+3.3 mint fee coins (MintTransaction)
+3.4 mint sender/recipient new coins or no (if balance is empty) (MintTransaction)
+3.5 destruct old coins (DestructTransaction)

@@ -1,0 +1,6 @@
+1. user initiate account refill
+2. transaction in
+2.1 validate credits amount via exchange rate
+2.2 mint coins with small amount of credits from the transaction (ideally to get ~10 coins from one mint transaction)
+2.3 add new coins
+2.4 attach coins to recipient in the ledger

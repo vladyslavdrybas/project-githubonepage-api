@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Repository\ApiKeyRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
@@ -33,8 +34,11 @@ class ApiKey implements EntityInterface
     #[ORM\JoinColumn(name:'project_id', referencedColumnName: 'id', nullable: false)]
     protected Project $project;
 
-    #[ORM\Column(name: "is_subscription_active", type: Types::BOOLEAN, options: ['default' => false])]
-    protected bool $isSubscriptionActive = false;
+    #[ORM\Column(name: "endDate", type: Types::DATETIME_MUTABLE, nullable: true)]
+    protected ?DateTimeInterface $endDate = null;
+
+    #[ORM\Column(name: "cost_per_call", type: Types::INTEGER, nullable: false, options: ['default' => 0])]
+    protected int $costPerCall = 0;
 
     public function __construct()
     {
@@ -44,7 +48,7 @@ class ApiKey implements EntityInterface
 
     public function isValid(): bool
     {
-        return $this->isSubscriptionActive;
+        return new DateTime() <= $this->endDate;
     }
 
     /**
@@ -138,18 +142,18 @@ class ApiKey implements EntityInterface
     }
 
     /**
-     * @return bool
+     * @return \DateTimeInterface|null
      */
-    public function isSubscriptionActive(): bool
+    public function getEndDate(): ?DateTimeInterface
     {
-        return $this->isSubscriptionActive;
+        return $this->endDate;
     }
 
     /**
-     * @param bool $isSubscriptionActive
+     * @param \DateTimeInterface|null $endDate
      */
-    public function setIsSubscriptionActive(bool $isSubscriptionActive): void
+    public function setEndDate(?DateTimeInterface $endDate): void
     {
-        $this->isSubscriptionActive = $isSubscriptionActive;
+        $this->endDate = $endDate;
     }
 }
