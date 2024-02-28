@@ -2,14 +2,13 @@ version: "3.9"
 
 services:
   php:
-    container_name: ${PROJECT_NAME:-solo}-${SERVICE_NAME:-service}-api-${API_VERSION:-1.0}-php
+    container_name: ${PROJECT_NAME:-solo}-${SERVICE_NAME:-service}-api-${API_VERSION:-1.0}-php-${APP_ENV:-none}
     image: vd_php_base:1.0
     build:
         args:
           APP_ENV: ${APP_ENV}
     env_file:
       - .env
-      - .env.local
     networks:
       - default
       - database_network
@@ -22,14 +21,13 @@ services:
 
 ###> doctrine/doctrine-bundle ###
   database:
-    container_name: ${PROJECT_NAME:-solo}-${SERVICE_NAME:-service}-db
+    container_name: ${PROJECT_NAME:-solo}-${SERVICE_NAME:-service}-db-${APP_ENV:-none}
     image: vd_postgres_base:1.0
     build:
       args:
         APP_ENV: ${APP_ENV}
     env_file:
       - .env
-      - .env.local
     networks:
       default:
         aliases:
@@ -44,14 +42,13 @@ services:
 ###< doctrine/doctrine-bundle ###
 
   web:
-    container_name: ${PROJECT_NAME:-solo}-${SERVICE_NAME:-service}-api-${API_VERSION:-1.0}-web
+    container_name: ${PROJECT_NAME:-solo}-${SERVICE_NAME:-service}-api-${API_VERSION:-1.0}-web-${APP_ENV:-none}
     image: vd_nginx_base:1.0
     build:
       args:
         APP_ENV: ${APP_ENV}
     env_file:
       - .env
-      - .env.local
     networks:
       - proxy_network
       - default

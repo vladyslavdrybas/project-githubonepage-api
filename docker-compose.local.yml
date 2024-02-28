@@ -1,13 +1,6 @@
 version: "3.9"
 
 services:
-  php:
-    container_name: ${PROJECT_NAME:-solo}-${SERVICE_NAME:-service}-api-${API_VERSION:-1.0}-php-${APP_ENV:-local}
-
   database:
-    container_name: ${PROJECT_NAME:-solo}-${SERVICE_NAME:-service}-api-${API_VERSION:-1.0}-db-${APP_ENV:-local}
     ports:
       - "64070:5432"
-      
-  web:
-    container_name: ${PROJECT_NAME:-solo}-${SERVICE_NAME:-service}-api-${API_VERSION:-1.0}-web-${APP_ENV:-local}
