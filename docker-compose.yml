@@ -54,8 +54,8 @@ services:
       - php
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-http.rule=Host(`${HOST}`) && PathPrefix(`/api/v${API_VERSION}`, `/_profiler`)"
-      - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-https.rule=Host(`${HOST}`) && PathPrefix(`/api/v${API_VERSION}`, `/_profiler`)"
+      - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-http.rule=Host(`${HOST}`) && PathPrefix(`/oauth`, `/api/v${API_VERSION}`, `/_profiler`)"
+      - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-https.rule=Host(`${HOST}`) && PathPrefix(`/oauth`, `/api/v${API_VERSION}`, `/_profiler`)"
       - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-https.tls.domains[0].main=${HOST}"
       - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-http.entrypoints=web"
       - "traefik.http.middlewares.${PROJECT_NAME}-${SERVICE_NAME}-https.redirectscheme.scheme=https"

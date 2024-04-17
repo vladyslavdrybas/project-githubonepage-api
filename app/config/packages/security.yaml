@@ -23,6 +23,11 @@ security:
     dev:
       pattern: ^/(_(profiler|wdt)|css|images|js)/
       security: false
+    api_oauth:
+#      pattern: '^/%service_name%/api/v%api_version%/auth/register'
+      pattern: '^/oauth'
+      security: false
+      stateless: false
     api_register:
 #      pattern: '^/%service_name%/api/v%api_version%/auth/register'
       pattern: '^/auth/register'
@@ -67,6 +72,7 @@ security:
 #    - { path: '^%service_name%/api', roles: IS_AUTHENTICATED_FULLY }
     - { path: '^/$', roles: PUBLIC_ACCESS }
     - { path: '^/check', roles: PUBLIC_ACCESS }
+    - { path: '^/oauth/', roles: PUBLIC_ACCESS }
     - { path: '^/auth/(login|register|token/refresh)', roles: PUBLIC_ACCESS }
     - { path: '^/', roles: IS_AUTHENTICATED_FULLY }
 
