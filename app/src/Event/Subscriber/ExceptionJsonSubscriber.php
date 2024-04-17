@@ -68,6 +68,9 @@ class ExceptionJsonSubscriber implements EventSubscriberInterface
 
         $data = [
             'status' => $code,
+            'host' => $event->getRequest()->server->get('HOST'),
+            'requestUri' => $event->getRequest()->server->get('REQUEST_URI'),
+            'queryString' => $event->getRequest()->server->get('QUERY_STRING'),
             'environment' => $this->projectEnvironment,
             'service' => $this->parameterBag->get('service_name'),
             'version' => $this->parameterBag->get('api_version'),

@@ -32,12 +32,6 @@ class AuthController extends AbstractController
         ], Response::HTTP_OK);
     }
 
-    #[Route('/check', name: '_check', methods: ["GET"])]
-    public function check(): Response
-    {
-        return new Response('OK', Response::HTTP_OK);
-    }
-
     #[Route('/logout', name: '_logout', defaults: ['deviceType' => 'web'], methods: ['GET', 'POST', 'OPTIONS'])]
     public function logout(): never
     {

@@ -14,7 +14,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
-use function var_dump;
 
 class LogoutSubscriber implements EventSubscriberInterface
 {
@@ -48,24 +47,6 @@ class LogoutSubscriber implements EventSubscriberInterface
         if (null === $token) {
             return;
         }
-        // get the current request
-//        $request = $event->getRequest();
-
-//        $user = $token->getUser();
-
-//        $deviceType = $request->attributes->get('deviceType') ?? '';
-
-//        $fcmTokens = $this->messagingRepository->findBy([
-//            'deviceType' => FcmTokenDeviceType::getOrDefault($deviceType),
-//            'user' => $user,
-//        ]);
-//
-//        if (count($fcmTokens)) {
-//            foreach ($fcmTokens as $t) {
-//                $this->messagingRepository->remove($t);
-//            }
-//            $this->messagingRepository->save();
-//        }
 
         // configure a custom logout response
         $response = new JsonResponse(

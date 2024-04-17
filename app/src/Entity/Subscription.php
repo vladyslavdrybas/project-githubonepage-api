@@ -6,8 +6,6 @@ namespace App\Entity;
 
 use App\Repository\SubscriptionRepository;
 use DateTimeInterface;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -34,15 +32,6 @@ class Subscription extends AbstractEntity
 
     #[ORM\Column(name: "is_payed", type: Types::BOOLEAN, nullable: false, options: ['default' => false])]
     protected bool $isPayed = false;
-
-    #[ORM\OneToMany(mappedBy: 'subscription', targetEntity: Project::class)]
-    protected Collection $projects;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->projects = new ArrayCollection();
-    }
 
     /**
      * @return \App\Entity\User
@@ -90,35 +79,6 @@ class Subscription extends AbstractEntity
     public function setEndDate(?DateTimeInterface $endDate): void
     {
         $this->endDate = $endDate;
-    }
-
-    /**
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getProjects(): Collection
-    {
-        return $this->projects;
-    }
-
-    public function addProject(Project $project): void
-    {
-        if (!$this->projects->contains($project)) {
-            $this->projects->add($project);
-        }
-    }
-
-    /**
-     * @param \Doctrine\Common\Collections\Collection $projects
-     */
-    public function setProjects(Collection $projects): void
-    {
-        foreach ($projects as $project) {
-            if (!$project instanceof Project) {
-                throw new \Exception('Should be instance of ' . Project::class);
-            }
-
-            $this->addProject($project);
-        }
     }
 
     /**

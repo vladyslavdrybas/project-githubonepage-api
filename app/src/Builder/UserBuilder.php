@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Builder;
 
-use App\Entity\Ledger;
 use App\Entity\User;
 use App\Exceptions\AlreadyExists;
 use App\Repository\UserRepository;
@@ -50,11 +49,6 @@ class UserBuilder implements IEntityBuilder
         );
 
         $user->setPassword($hashedPassword);
-
-        $ledger = new Ledger();
-        $ledger->setOwner($user);
-
-        $user->setLedger($ledger);
 
         return $user;
     }

@@ -32,7 +32,7 @@ services:
           - database
       database_network:
         aliases:
-          - apikey_database
+          - "${DATABASE_ALIAS}"
     labels:
       - "traefik.enable=false"
     volumes:
@@ -54,15 +54,15 @@ services:
       - php
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-http.rule=Host(`${HOST}`) && PathPrefix(`/${SERVICE_NAME}/api/v${API_VERSION}`, `/${SERVICE_NAME}/_profiler`)"
-      - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-https.rule=Host(`${HOST}`) && PathPrefix(`/${SERVICE_NAME}/api/v${API_VERSION}`, `/${SERVICE_NAME}/_profiler`)"
+      - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-http.rule=Host(`${HOST}`) && PathPrefix(`/api/v${API_VERSION}`, `/_profiler`)"
+      - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-https.rule=Host(`${HOST}`) && PathPrefix(`/api/v${API_VERSION}`, `/_profiler`)"
       - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-https.tls.domains[0].main=${HOST}"
       - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-http.entrypoints=web"
       - "traefik.http.middlewares.${PROJECT_NAME}-${SERVICE_NAME}-https.redirectscheme.scheme=https"
       - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-https.entrypoints=websecure"
       - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-https.tls=true"
       - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-http.middlewares=${PROJECT_NAME}-${SERVICE_NAME}-https"
-      - "traefik.http.middlewares.${PROJECT_NAME}-${SERVICE_NAME}-apiprefix.stripprefixregex.regex=/${SERVICE_NAME}/(?:api|proxy|dashboard|panel)/v[0-9]+(?:\\.[0-9]+)?/"
+      - "traefik.http.middlewares.${PROJECT_NAME}-${SERVICE_NAME}-apiprefix.stripprefixregex.regex=/api/v[0-9]+(?:\\.[0-9]+)?/"
       - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-https.middlewares=${PROJECT_NAME}-${SERVICE_NAME}-apiprefix"
     volumes:
       - ./app/public:/app/public

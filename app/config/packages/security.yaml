@@ -66,6 +66,7 @@ security:
 #    - { path: '^%service_name%/api/v%api_version%/auth/(login|register|token/refresh)', roles: PUBLIC_ACCESS }
 #    - { path: '^%service_name%/api', roles: IS_AUTHENTICATED_FULLY }
     - { path: '^/$', roles: PUBLIC_ACCESS }
+    - { path: '^/check', roles: PUBLIC_ACCESS }
     - { path: '^/auth/(login|register|token/refresh)', roles: PUBLIC_ACCESS }
     - { path: '^/', roles: IS_AUTHENTICATED_FULLY }
 

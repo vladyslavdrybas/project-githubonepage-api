@@ -6,8 +6,6 @@ namespace App\Entity;
 
 use App\Entity\Types\PeriodType;
 use App\Repository\SubscriptionPlanRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -45,18 +43,6 @@ class SubscriptionPlan extends AbstractEntity
     # month, year
     #[ORM\Column(name: "period", type: Types::STRING, length: 7, enumType: PeriodType::class)]
     protected PeriodType $period = PeriodType::MONTH;
-
-    #[ORM\JoinTable(name: 'subscription_plan_offer')]
-    #[ORM\JoinColumn(name: 'subscription_plan_id', referencedColumnName: 'id')]
-    #[ORM\InverseJoinColumn(name: 'offer_id', referencedColumnName: 'id')]
-    #[ORM\ManyToMany(targetEntity: Offer::class)]
-    protected Collection $offers;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->offers = new ArrayCollection();
-    }
 
     /**
      * @return string
@@ -168,34 +154,5 @@ class SubscriptionPlan extends AbstractEntity
     public function setPeriod(PeriodType $period): void
     {
         $this->period = $period;
-    }
-
-    /**
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getOffers(): Collection
-    {
-        return $this->offers;
-    }
-
-    public function addOffer(Offer $offer): void
-    {
-        if (!$this->offers->contains($offer)) {
-            $this->offers->add($offer);
-        }
-    }
-
-    /**
-     * @param \Doctrine\Common\Collections\Collection $offers
-     */
-    public function setOffers(Collection $offers): void
-    {
-        foreach ($offers as $offer) {
-            if (!$offer instanceof Offer) {
-                throw new \Exception('Should be instance of ' . Offer::class);
-            }
-
-            $this->addOffer($offer);
-        }
     }
 }

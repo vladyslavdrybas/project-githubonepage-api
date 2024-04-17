@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Serializer;
 
 use App\Entity\EntityInterface;
-use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;

@@ -42,15 +42,6 @@ class SubscriptionController extends AbstractController
         $dto = new SubscriptionDto($this->getUser(), $subscriptionPlan);
         $subscription = $builder->base($dto);
 
-//        $period = $subscriptionPlan->getPeriod();
-//        $subscriptionEndDate = match($period) {
-//            PeriodType::MONTH => new DateTime('+1 month'),
-//            PeriodType::YEAR => new DateTime('+1 year'),
-//            PeriodType::QUARTER => new DateTime('+3 months'),
-//            default => null
-//        };
-//        $subscription->setEndDate($subscriptionEndDate);
-
         $repo->add($subscription);
         $repo->save();
 
