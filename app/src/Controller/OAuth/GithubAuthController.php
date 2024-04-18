@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 #[Route('/oauth/github', name: "oauth_github")]
-class GithubController extends AbstractController
+class GithubAuthController extends AbstractController
 {
     /**
      * Link to this controller to start the "connect" process
@@ -25,8 +25,7 @@ class GithubController extends AbstractController
         return $clientRegistry
             ->getClient('github') // key used in config/packages/knpu_oauth2_client.yaml
             ->redirect([
-                'user',
-                'repo', // the scopes you want to access
+                'read:user',
             ]);
     }
 
@@ -46,14 +45,14 @@ class GithubController extends AbstractController
         $client = $clientRegistry->getClient('github');
 
         $token = $client->getAccessToken([
-            'user', 'repo:status' // the scopes you want to access
+            'read:user'
         ]);
 
         // TODO Store token to db
 
         return $this->json([
             'message' => 'success',
-//            'token' => $token->getToken(),
+            'token' => $token->getToken(),
         ], Response::HTTP_OK);
     }
 }
