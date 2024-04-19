@@ -17,19 +17,11 @@ abstract class AbstractController extends SymfonyAbstractController
     public const LOGIN_ROUTE = RouteConstants::LOGIN_ROUTE;
     public const HOMEPAGE_ROUTE = RouteConstants::HOMEPAGE_ROUTE;
 
-    protected EntityManagerInterface $entityManager;
-    protected UrlGeneratorInterface $urlGenerator;
-    protected SerializerInterface $serializer;
-
     public function __construct(
-        EntityManagerInterface $entityManager,
-        UrlGeneratorInterface $urlGenerator,
-        SerializerInterface $serializer
-    ) {
-        $this->entityManager = $entityManager;
-        $this->urlGenerator = $urlGenerator;
-        $this->serializer = $serializer;
-    }
+        protected EntityManagerInterface $entityManager,
+        protected UrlGeneratorInterface $urlGenerator,
+        protected SerializerInterface $serializer
+    ) {}
 
     protected function getUser(): ?User
     {
