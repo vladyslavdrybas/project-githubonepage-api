@@ -107,6 +107,16 @@ class GithubMetricsController extends AbstractController
             query($userName:String!) {
                     user(login: $userName){
                         contributionsCollection(from:"'. $from->format(DateTimeInterface::ATOM) .'", to:"'. $to->format(DateTimeInterface::ATOM) .'") {
+                            totalCommitContributions
+                            totalIssueContributions
+                            totalPullRequestContributions
+                            totalPullRequestReviewContributions
+                            totalRepositoriesWithContributedCommits
+                            totalRepositoriesWithContributedIssues
+                            totalRepositoriesWithContributedPullRequestReviews
+                            totalRepositoriesWithContributedPullRequests
+                            totalRepositoryContributions
+
                             contributionCalendar {
                                 totalContributions
                                 weeks {
@@ -144,10 +154,25 @@ class GithubMetricsController extends AbstractController
                 ]
             );
 
-            $calendar = $response->toArray()['data']['user']['contributionsCollection']['contributionCalendar'];
+            $contributionsCollection = $response->toArray()['data']['user']['contributionsCollection'];
+            $calendar = $contributionsCollection['contributionCalendar'];
 
             $githubUserContributions->setTotal($calendar['totalContributions']);
             $githubUserContributions->setWeeks($calendar['weeks']);
+
+            $metadata = [
+                'totalCommitContributions' => $contributionsCollection['totalCommitContributions'],
+                'totalIssueContributions' => $contributionsCollection['totalIssueContributions'],
+                'totalPullRequestContributions' => $contributionsCollection['totalPullRequestContributions'],
+                'totalPullRequestReviewContributions' => $contributionsCollection['totalPullRequestReviewContributions'],
+                'totalRepositoriesWithContributedCommits' => $contributionsCollection['totalRepositoriesWithContributedCommits'],
+                'totalRepositoriesWithContributedIssues' => $contributionsCollection['totalRepositoriesWithContributedIssues'],
+                'totalRepositoriesWithContributedPullRequestReviews' => $contributionsCollection['totalRepositoriesWithContributedPullRequestReviews'],
+                'totalRepositoriesWithContributedPullRequests' => $contributionsCollection['totalRepositoriesWithContributedPullRequests'],
+                'totalRepositoryContributions' => $contributionsCollection['totalRepositoryContributions'],
+                'totalContributions' => $calendar['totalContributions'],
+            ];
+            $githubUserContributions->setMetadata($metadata);
 
             $metricsRepo->add($githubUserContributions);
         }

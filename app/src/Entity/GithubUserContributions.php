@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\GithubUserContributionsRepository;
-use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -32,6 +31,9 @@ class GithubUserContributions extends AbstractEntity
 
     #[ORM\Column(nullable: true)]
     protected ?array $weeks = null;
+
+    #[ORM\Column(nullable: true)]
+    protected ?array $metadata = null;
 
     /**
      * @return User
@@ -95,5 +97,21 @@ class GithubUserContributions extends AbstractEntity
     public function setWeeks(?array $weeks): void
     {
         $this->weeks = $weeks;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getMetadata(): ?array
+    {
+        return $this->metadata;
+    }
+
+    /**
+     * @param array|null $metadata
+     */
+    public function setMetadata(?array $metadata): void
+    {
+        $this->metadata = $metadata;
     }
 }
