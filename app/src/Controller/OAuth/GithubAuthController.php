@@ -82,6 +82,9 @@ class GithubAuthController extends AbstractController
     {
         $session = $request->getSession();
         $oauthHash =  $session->get(static::SESSION_OAUTH_HASH);
+        if (null === $oauthHash) {
+            throw $this->createNotFoundException();
+        }
         $hash = $this->getOAuthHash($oauthHash);
 
         $accessTokenDto = $this->getGithubAccessToken();
