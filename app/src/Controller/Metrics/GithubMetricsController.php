@@ -4,6 +4,8 @@ namespace App\Controller\Metrics;
 
 use App\Controller\AbstractController;
 use App\Entity\GithubAccessToken;
+use App\Entity\GithubUserContributions;
+use App\Entity\User;
 use DateTime;
 use DateTimeInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -27,20 +29,18 @@ class GithubMetricsController extends AbstractController
         {
             $this->getStoreMetrics(
                 $httpClient,
+                $user,
                 $accessToken->getUsername(),
                 $accessToken->getAccessToken(),
             );
         }
-        exit;
 
-
-
-
-        return $this->json($response->toArray(), Response::HTTP_OK);
+        return $this->json(['message' => 'success'], Response::HTTP_OK);
     }
 
     protected function getStoreMetrics(
         HttpClientInterface $httpClient,
+        User $owner,
         string $githubUsername,
         string $githubAccessToken
     ): void {
@@ -53,13 +53,6 @@ class GithubMetricsController extends AbstractController
                 }
             }
         ';
-
-        // TODO add rebbitMQ to process it in queue
-        // TODO get commit years
-        // TODO get commits per year
-        // TODO combine everything
-        // TODO store it into db
-        // TODO send response
 
         $variables = '{"userName": "'. $githubUsername .'"}';
 
@@ -85,12 +78,26 @@ class GithubMetricsController extends AbstractController
         $userContributions = $response->toArray();
         $userContributionYears = $userContributions['data']['user']['contributionsCollection']['contributionYears'];
 
-        dump($userContributions);
-        dump($userContributionYears);
-
-        $contributionsByYear = [];
+        $currentYear = (new DateTime())->format('Y');
+        $metricsRepo = $this->entityManager->getRepository(GithubUserContributions::class);
         foreach ($userContributionYears as $userContributionYear)
         {
+            $githubUserContributions = $metricsRepo->findOneBy([
+                'owner' => $owner,
+                'year' => $userContributionYear,
+            ]);
+
+            if (!$githubUserContributions instanceof GithubUserContributions) {
+                $githubUserContributions = new GithubUserContributions();
+            } else {
+                if ($githubUserContributions->getYear() < $currentYear - 1) {
+                    continue;
+                }
+            }
+
+            $githubUserContributions->setOwner($owner);
+            $githubUserContributions->setYear($userContributionYear);
+
             $from = new DateTime();
             $from->setDate($userContributionYear, 1 , 1)->setTime(0, 0 , 0);
             $to = new DateTime();
@@ -100,18 +107,9 @@ class GithubMetricsController extends AbstractController
             query($userName:String!) {
                     user(login: $userName){
                         contributionsCollection(from:"'. $from->format(DateTimeInterface::ATOM) .'", to:"'. $to->format(DateTimeInterface::ATOM) .'") {
-                        totalRepositoriesWithContributedCommits
-                            totalCommitContributions
                             contributionCalendar {
                                 totalContributions
-                                months {
-                                    firstDay
-                                    name
-                                    totalWeeks
-                                    year
-                                }
                                 weeks {
-                                    firstDay
                                     contributionDays {
                                         contributionCount
                                         date
@@ -127,7 +125,6 @@ class GithubMetricsController extends AbstractController
                 }
             ';
 
-            dump($query);
             $body = [
                 'query' => $query,
                 'variables' => $variables,
@@ -147,9 +144,16 @@ class GithubMetricsController extends AbstractController
                 ]
             );
 
-            $contributionsByYear[$userContributionYear] = $response->toArray();
+            $calendar = $response->toArray()['data']['user']['contributionsCollection']['contributionCalendar'];
+
+            $githubUserContributions->setTotal($calendar['totalContributions']);
+            $githubUserContributions->setWeeks($calendar['weeks']);
+
+            $metricsRepo->add($githubUserContributions);
         }
 
-        dump($contributionsByYear);
+        if (count($userContributionYears) > 0) {
+            $metricsRepo->save();
+        }
     }
 }

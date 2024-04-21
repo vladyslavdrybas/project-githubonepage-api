@@ -12,7 +12,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\Entity(repositoryClass: GithubAccessTokenRepository::class, readOnly: false)]
 #[ORM\Table(name: "github_access_token")]
 #[UniqueEntity(
-    fields: ['owner', '$email'],
+    fields: ['owner', 'email', 'username'],
     message: 'There is already an account with this email connected to the user.'
 )]
 #[ORM\UniqueConstraint(
