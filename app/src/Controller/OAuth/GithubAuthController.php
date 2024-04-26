@@ -11,6 +11,7 @@ use App\Entity\OAuthHash;
 use App\Entity\User;
 use App\Repository\GithubAccessTokenRepository;
 use App\Repository\UserRepository;
+use App\Utility\EmailHasher;
 use App\Utility\RandomGenerator;
 use DateTime;
 use DateTimeInterface;
@@ -20,13 +21,13 @@ use JetBrains\PhpStorm\NoReturn;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\Provider\GithubClient;
 use App\Controller\AbstractController;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -44,20 +45,22 @@ class GithubAuthController extends AbstractController
         protected SerializerInterface $serializer,
         protected UserBuilder $userBuilder,
         protected UserRepository $userRepository,
-        protected RandomGenerator $randomGenerator
+        protected RandomGenerator $randomGenerator,
+        protected LoggerInterface $logger,
+        protected EmailHasher $emailHasher
     ) {
-        parent::__construct($entityManager, $urlGenerator, $serializer);
+        parent::__construct($entityManager, $urlGenerator, $serializer, $logger);
     }
 
     /**
      * Link to this controller to start the "connect" process
      */
-    #[Route("/connect/hash-{hash}", name: "_connect", methods: ["GET"])]
-    public function connectAction(
-        string $hash,
-        Request $request
-    ): RedirectResponse {
-        $hash = $this->getOAuthHash($hash);
+    #[Route("/connect", name: "_connect", methods: ["GET"])]
+    public function connectAction(Request $request): RedirectResponse {
+        $hash = $this->getOAuthHash($request);
+        if (null === $hash) {
+            throw $this->createAccessDeniedException();
+        }
 
         $session = $request->getSession();
         $session->set(static::SESSION_OAUTH_HASH, $hash->getHash());
@@ -80,35 +83,89 @@ class GithubAuthController extends AbstractController
     #[NoReturn] #[Route("/connect/check", name: "_connect_check", methods: ["GET"])]
     public function  connectCheckAction(Request $request): JsonResponse
     {
-        $session = $request->getSession();
-        $oauthHash =  $session->get(static::SESSION_OAUTH_HASH);
-        if (null === $oauthHash) {
-            throw $this->createNotFoundException();
-        }
-        $hash = $this->getOAuthHash($oauthHash);
-
-        $accessTokenDto = $this->getGithubAccessToken();
-
-        $githubUserDto = $this->getGithubUser($accessTokenDto);
-
-        $this->validateIfGithubEmailsAreInSystem($githubUserDto, $hash);
-        $this->storeAccessTokens($githubUserDto, $accessTokenDto, $hash);
-
-        return $this->json([
-            'message' => 'success',
-        ], Response::HTTP_OK);
-    }
-
-    protected function getOAuthHash(string $hash): OAuthHash
-    {
-        $hash = $this->entityManager->getRepository(OAuthHash::class)->findOneBy(['hash' => $hash]);
+        $hash = $this->getOAuthHash($request);
         if (null === $hash) {
             throw $this->createAccessDeniedException();
         }
 
-        $diff = (new DateTime())->getTimestamp() - $hash->getExpireAt()->getTimestamp();
-        if (300 < $diff) {
+        $userCreationEnable = $this->getParameter('oauth_create_user_enable') ?? false;
+        if (!$userCreationEnable && null === $hash->getEmail()) {
+            $this->logger->error('Creation a new user from oauth restricted');
+
             throw $this->createAccessDeniedException();
+        }
+
+        $accessTokenDto = $this->getGithubAccessToken();
+        $githubUserDto = $this->getGithubUser($accessTokenDto);
+
+        $responseData = [
+            'message' => 'success',
+        ];
+
+        if ($userCreationEnable && null === $hash->getEmail()) {
+            // create user from github
+            $owner = $this->userBuilder->github($githubUserDto);
+            //TODO generate hash for a new user to get JWT
+
+            $this->userRepository->add($owner);
+            $this->userRepository->save();
+        } else {
+            $githubUserIsInHash = $this->checkIfGithubEmailsAreInHash($githubUserDto, $hash);
+            if (!$githubUserIsInHash) {
+                throw $this->createAccessDeniedException();
+            }
+
+            $owner = $this->userRepository->loadByHashedEmail($hash->getEmail());
+        }
+
+        $this->storeAccessTokens($githubUserDto, $accessTokenDto, $owner, $hash);
+
+        return $this->json($responseData, Response::HTTP_OK);
+    }
+
+    protected function checkIfGithubEmailsAreInHash(GithubUserDto $githubUserDto, OAuthHash $hash): bool
+    {
+        foreach ($githubUserDto->emails as $emailDto)
+        {
+            $gEmailHash = $this->emailHasher->hash($emailDto->email);
+            $uEmailHash = $hash->getEmail();
+
+            if ($gEmailHash === $uEmailHash) {
+                $githubUserDto->email = $emailDto->email;
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function getOAuthHash(Request $request): ?OAuthHash
+    {
+        $oauthHash = $request->query->get("authhash");
+        if (null === $oauthHash) {
+            $oauthHash =   $request->getSession()->get(static::SESSION_OAUTH_HASH);
+        }
+
+        if (null === $oauthHash) {
+            $this->logger->error('Not found oauth hash in query');
+
+            return null;
+        }
+
+        $hash = $this->entityManager->getRepository(OAuthHash::class)->findOneBy(['hash' => $oauthHash]);
+        if (null === $hash) {
+            $this->logger->error('Not found oauth hash in system');
+
+            return null;
+        }
+
+        $diff = (new DateTime())->getTimestamp() - $hash->getExpireAt()->getTimestamp();
+        $oauthHashLifetime = $this->getParameter('oauth_hash_lifetime') ?? 600;
+        if ($oauthHashLifetime < $diff) {
+            $this->logger->error('Oauth hash expired.');
+
+            return null;
         }
 
         return $hash;
@@ -172,23 +229,12 @@ class GithubAuthController extends AbstractController
         return $this->serializer->denormalize($data, GithubUserDto::class);
     }
 
-    protected function validateIfGithubEmailsAreInSystem(GithubUserDto $githubUserDto, OAuthHash $hash): void
-    {
-        foreach ($githubUserDto->emails as $emailDto)
-        {
-            if ($emailDto->email === $hash->getOwner()->getEmail()) {
-                $githubUserDto->email = $emailDto->email;
-
-                break;
-            }
-        }
-
-        if ($githubUserDto->email !== $hash->getOwner()->getEmail()) {
-            throw $this->createAccessDeniedException();
-        }
-    }
-
-    protected function storeAccessTokens(GithubUserDto $githubUserDto, AccessTokenDto $accessTokenDto, OAuthHash $OAuthHash): void
+    protected function storeAccessTokens(
+        GithubUserDto $githubUserDto,
+        AccessTokenDto $accessTokenDto,
+        User $owner,
+        OAuthHash $OAuthHash
+    ): void
     {
         $accessTokenRepo = $this->entityManager->getRepository(GithubAccessToken::class);
         $oAuthHashRepo = $this->entityManager->getRepository(OAuthHash::class);
@@ -201,7 +247,7 @@ class GithubAuthController extends AbstractController
                 $token->setExpireAt($accessTokenDto->expires);
             }
 
-            $token->setOwner($OAuthHash->getOwner());
+            $token->setOwner($owner);
             $token->setEmail($emailDto->email);
             $token->setFirstname($githubUserDto->name);
             $token->setUsername($githubUserDto->login);
@@ -210,16 +256,6 @@ class GithubAuthController extends AbstractController
             $metadata = [
                 'user' => $this->serializer->normalize($githubUserDto),
                 'token' => $this->serializer->normalize($accessTokenDto),
-                'hash' => $this->serializer->normalize(
-                    $OAuthHash,
-                    'array',
-                    [
-                        AbstractNormalizer::CALLBACKS => [
-                            'owner' => function (User $value) { return $value->getRawId(); },
-                        ],
-                        AbstractNormalizer::IGNORED_ATTRIBUTES => ['rawId','object'],
-                    ]
-                ),
             ];
 
             $token->setMetadata($metadata);

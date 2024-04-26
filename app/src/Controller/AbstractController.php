@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Constants\RouteConstants;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController as SymfonyAbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -20,7 +21,8 @@ abstract class AbstractController extends SymfonyAbstractController
     public function __construct(
         protected EntityManagerInterface $entityManager,
         protected UrlGeneratorInterface $urlGenerator,
-        protected SerializerInterface $serializer
+        protected SerializerInterface $serializer,
+        protected LoggerInterface $logger
     ) {}
 
     protected function getUser(): ?User

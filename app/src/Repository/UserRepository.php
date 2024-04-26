@@ -49,6 +49,20 @@ class UserRepository extends AbstractRepository implements PasswordUpgraderInter
         return $this->findByEmail($identifier);
     }
 
+    public function loadByHashedEmail(string $hash): ?User
+    {
+        $query = $this->createQueryBuilder('t')
+            ->where('t.emailHashed = :identifier')
+            ->setParameter('identifier', $hash);
+
+        $result = $query->getQuery()->getOneOrNullResult();
+        if ($result instanceof User) {
+            return $result;
+        }
+
+        return null;
+    }
+
     public function loadUserByUsername(string $identifier): ?UserInterface
     {
 //        return $this->findByEmail($identifier);

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Builder;
 
+use App\DataTransferObject\GithubUserDto;
 use App\Entity\User;
 use App\Exceptions\AlreadyExists;
 use App\Repository\UserRepository;
+use App\Utility\EmailHasher;
 use App\Utility\RandomGenerator;
 use InvalidArgumentException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -16,7 +18,9 @@ class UserBuilder implements IEntityBuilder
 {
     public function __construct(
         protected readonly UserPasswordHasherInterface $passwordHasher,
-        protected readonly UserRepository $userRepository
+        protected readonly RandomGenerator $randomGenerator,
+        protected readonly UserRepository $userRepository,
+        protected readonly EmailHasher $emailHasher,
     ) {}
 
     public function base(
@@ -27,6 +31,9 @@ class UserBuilder implements IEntityBuilder
         if (strlen($email) < 6) {
             throw new InvalidArgumentException('Invalid email length. Expect string length greater than 5.');
         }
+        if (strlen($password) < 6) {
+            throw new InvalidArgumentException('Invalid password length. Expect string length greater than 6.');
+        }
 
         $exist = $this->userRepository->findByEmail($email);
         if ($exist instanceof User) {
@@ -36,6 +43,7 @@ class UserBuilder implements IEntityBuilder
         $user = new User();
 
         $user->setEmail($email);
+        $user->setEmailHashed($this->emailHasher->hash($email));
         $user->setPassword($password);
 
         if (null === $username) {
@@ -51,5 +59,23 @@ class UserBuilder implements IEntityBuilder
         $user->setPassword($hashedPassword);
 
         return $user;
+    }
+
+    public function github(GithubUserDto $githubUserDto): User
+    {
+        $email = null;
+        foreach ($githubUserDto->emails as $emailDto)
+        {
+            if ($emailDto->primary) {
+                $email = $emailDto->email;
+
+                break;
+            }
+        }
+
+        $password = $this->randomGenerator->sha256($email);
+        $username = $githubUserDto->username ?? null;
+
+        return $this->base($email, $password, $username);
     }
 }

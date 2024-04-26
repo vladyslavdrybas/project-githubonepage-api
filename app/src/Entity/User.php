@@ -35,6 +35,10 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
     #[ORM\Column( name: "email", type: Types::STRING, length: 180, unique: true, nullable: false )]
     protected string $email = '';
 
+    #[Assert\NotBlank]
+    #[ORM\Column( name: "email_hashed", type: Types::STRING, length: 64, unique: true, nullable: false )]
+    protected string $emailHashed = '';
+
     #[ORM\Column( name: "username", type: Types::STRING, length: 100, unique: true, nullable: false)]
     protected string $username = '';
 
@@ -105,6 +109,7 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
     public function setUserIdentifier(string $identifier): void
     {
         $this->setEmail($identifier);
+
     }
 
     public function eraseCredentials(): void
@@ -135,6 +140,7 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
     public function setEmail(string $email): void
     {
         $this->email = $email;
+        $this->setEmailHashed(hash('sha256', $email));
     }
 
     /**
@@ -247,5 +253,21 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
     public function setSubscription(?SubscriptionPlan $subscription): void
     {
         $this->subscription = $subscription;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEmailHashed(): string
+    {
+        return $this->emailHashed;
+    }
+
+    /**
+     * @param string $emailHashed
+     */
+    public function setEmailHashed(string $emailHashed): void
+    {
+        $this->emailHashed = $emailHashed;
     }
 }

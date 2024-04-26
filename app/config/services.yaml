@@ -7,6 +7,10 @@ parameters:
   table_prefix: 'smfn_'
   api_version: '%env(API_VERSION)%'
   service_name: '%env(SERVICE_NAME)%'
+  oauth_hash_lifetime: '%env(OAUTH_HASH_LIFETIME)%'
+  oauth_create_user_enable: '%env(bool:OAUTH_CREATE_USER_ENABLE)%'
+  app_secret: '%env(string:APP_SECRET)%'
+  hash_secret: '%env(string:HASH_SECRET)%'
 
 services:
     # default configuration for services in *this* file

@@ -5,32 +5,62 @@ namespace App\Controller\OAuth;
 use App\Controller\AbstractController;
 use App\Entity\OAuthHash;
 use App\Repository\OAuthHashRepository;
+use App\Utility\EmailHasher;
 use App\Utility\RandomGenerator;
 use DateTime;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/generator/hash', name: "generator_hash")]
 class HashGeneratorController extends AbstractController
 {
-    #[Route("/oauth", name: "_oauth", methods: ["GET"])]
-    public function oauth(
+    #[Route("/hash/oauth/user", name: "oauth_hash_user", methods: ["POST"])]
+    public function generateForUser(
         RandomGenerator $randomGenerator,
-        OAuthHashRepository $repository
+        OAuthHashRepository $repository,
+        EmailHasher $emailHasher
     ): JsonResponse {
         $user = $this->getUser();
-        $hash = $repository->findOneBy(['owner' => $user]);
+        $emailHash = $emailHasher->hash($user->getEmail());
 
+        $hash = $repository->findOneBy(['email' => $emailHash]);
         if (null !== $hash) {
             $repository->remove($hash);
             $repository->save();
         }
 
-        $hash = $randomGenerator->sha256($user->getRawId());
+        $oauthHashLifetime = $this->getParameter('oauth_hash_lifetime') ?? 600;
+
+        do {
+            $hash = $randomGenerator->sha256($user->getRawId());
+            $existedHash = $repository->findOneBy(['hash' => $hash]);
+        } while (null !== $existedHash);
+
         $oAuthHash = new OAuthHash();
         $oAuthHash->setHash($hash);
-        $oAuthHash->setOwner($user);
-        $oAuthHash->setExpireAt(new DateTime('+5 min'));
+        $oAuthHash->setEmail($emailHash);
+        $oAuthHash->setExpireAt(new DateTime('+'. $oauthHashLifetime .' sec'));
+
+        $repository->add($oAuthHash);
+        $repository->save();
+
+        return new JsonResponse(['hash' => $hash]);
+    }
+
+    #[Route("/oauth/hash/guest", name: "oauth_hash_guest", methods: ["POST"])]
+    public function generateForGuest(
+        RandomGenerator $randomGenerator,
+        OAuthHashRepository $repository
+    ): JsonResponse {
+        $oauthHashLifetime = $this->getParameter('oauth_hash_lifetime') ?? 600;
+
+        do {
+            $hash = $randomGenerator->sha256();
+            $existedHash = $repository->findOneBy(['hash' => $hash]);
+        } while (null !== $existedHash);
+
+        $oAuthHash = new OAuthHash();
+        $oAuthHash->setHash($hash);
+        $oAuthHash->setExpireAt(new DateTime('+'. $oauthHashLifetime .' sec'));
 
         $repository->add($oAuthHash);
         $repository->save();
