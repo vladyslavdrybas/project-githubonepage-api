@@ -63,7 +63,12 @@ services:
       - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-https.tls.domains[0].main=${HOST}"
       - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-http.middlewares=${PROJECT_NAME}-${SERVICE_NAME}-https"
       - "traefik.http.middlewares.${PROJECT_NAME}-${SERVICE_NAME}-apiprefix.stripprefixregex.regex=/api/v[0-9]+(?:\\.[0-9]+)?/"
-      - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-https.middlewares=${PROJECT_NAME}-${SERVICE_NAME}-apiprefix"
+      - "traefik.http.middlewares.${PROJECT_NAME}-${SERVICE_NAME}-header.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,HEAD,PATCH,DELETE"
+      - "traefik.http.middlewares.${PROJECT_NAME}-${SERVICE_NAME}-header.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.${PROJECT_NAME}-${SERVICE_NAME}-header.headers.accesscontrolalloworiginlist=*"
+      - "traefik.http.middlewares.${PROJECT_NAME}-${SERVICE_NAME}-header.headers.accesscontrolmaxage=100"
+      - "traefik.http.middlewares.${PROJECT_NAME}-${SERVICE_NAME}-header.headers.addvaryheader=true"
+      - "traefik.http.routers.${PROJECT_NAME}-${SERVICE_NAME}-https.middlewares=${PROJECT_NAME}-${SERVICE_NAME}-apiprefix,${PROJECT_NAME}-${SERVICE_NAME}-header"
     volumes:
       - ./app/public:/app/public
       - ./tmp/log/nginx/:/var/log/nginx
